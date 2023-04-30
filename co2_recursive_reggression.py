@@ -1,34 +1,28 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import tkinter
 import matplotlib
 from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import RandomForestRegressor
-import numpy as np
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 matplotlib.use("TkAgg")
 
-def create_recursive_data(data, window_size=5):
+def create_recursive_data(data, window_size, future_time):
     i = 1
     while i < window_size:
         data[f"co2_{i}"] = data["co2"].shift(-i)
         i = i + 1
 
-    data["target"] = data["co2"].shift(-i)
+    data["target"] = data["co2"].shift(-i - future_time + 1)
     data = data.dropna(axis=0)
     return data
 
 data = pd.read_csv("co2.csv")
 data["time"] = pd.to_datetime(data["time"])
 data["co2"] = data["co2"].interpolate()
-# fig, ax = plt.subplots()
-# ax.plot(data["time"], data["co2"])
-# ax.set_xlabel("time")
-# ax.set_ylabel("CO2")
-# plt.show()
+
 
 window_size = 5
-data = create_recursive_data(data=data, window_size=window_size)
+future__time = 1
+data = create_recursive_data(data=data, window_size=window_size, future_time=future__time)
 # print(data)
 
 target = "target"
@@ -41,7 +35,7 @@ y_train  = y[:int(num_samples*train_size)]
 x_test = X[int(num_samples*train_size):]
 y_test = y[int(num_samples*train_size):]
 
-reg = RandomForestRegressor()
+reg = LinearRegression()
 reg.fit(x_train, y_train)
 y_predict = reg.predict(x_test)
 
